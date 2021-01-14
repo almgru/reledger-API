@@ -42,6 +42,42 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "add",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "add",
+                "${workspaceFolder}/API/API.csproj",
+                "package",
+                "${input:packageToAdd}",
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "remove",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "remove",
+                "${workspaceFolder}/API/API.csproj",
+                "package",
+                "${input:packageToRemove}",
+            ],
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "packageToAdd",
+            "description": "Package to add:",
+            "type": "promptString"
+        },
+        {
+            "id": "packageToRemove",
+            "description": "Package to remove:",
+            "type": "promptString"
         }
     ]
 }
