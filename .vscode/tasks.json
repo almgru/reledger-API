@@ -7,6 +7,8 @@
             "type": "process",
             "args": [
                 "build",
+                "--project",
+                "API",
                 "${workspaceFolder}/API/API.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
@@ -19,6 +21,8 @@
             "type": "process",
             "args": [
                 "publish",
+                "--project",
+                "API",
                 "${workspaceFolder}/API/API.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
@@ -31,8 +35,9 @@
             "type": "process",
             "args": [
                 "watch",
+                "--project",
+                "API",
                 "run",
-                "${workspaceFolder}/API/API.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
