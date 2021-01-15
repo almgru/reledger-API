@@ -13,21 +13,49 @@ namespace API.DAO
             this.connectionString = connectionString;
         }
 
-        public void AddTransaction(string debitAccount, decimal amount, string creditAccount, DateTime date,
-                                   List<String> tags)
+        public void AddTransaction(string debitAccount, decimal amount, string currency, string creditAccount,
+                                   DateTime date, string description, List<string> tags,
+                                   List<(string, byte[])> attachments)
         {
             // 1. Insert debit account into database in case its missing
+            this.AddAccount(debitAccount);
             // 2. Insert credit account into database in case its missing
-            // 3. Add all tags into the database in case any are missing
-            // 4. Insert the transaction into the database
+            this.AddAccount(creditAccount);
+            // 3. Insert the transaction into the database
+            Int64 id = this.AddTransaction(amount, currency, date, description);
+            // 4. Add all tags into the database in case any are missing
+            foreach (string tag in tags)
+            {
+                this.AddTag(tag, id);
+            }
             // 5. Link the transaction to the debited account by inserting its ID and the debit account name into the
             //    'Debits' table.
             // 6. Link the transaction to the credited account by inserting its ID and the credit account name into the
             //    'Credits' table.
-            // 7. For each tag, link it to the transaction by inserting the transaction ID and the tag's name into the
-            //    'Categorizes' table.
-            // 8. For each attachment, link it to the transaction by inserting the transaction ID, the attachment name,
+            // 7. For each attachment, link it to the transaction by inserting the transaction ID, the attachment name,
             //    and the binary blob into the 'Attachments' table.
+        }
+
+        private Int64 AddTransaction(decimal amount, string currency, DateTime date, string description)
+        {
+            Int64 lastRowId;
+
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                lastRowId = (Int64)this.ExecuteScalarCommand(connection,
+                    @"
+                        INSERT INTO Transactions(date, amount, currency, description)
+                        VALUES(:date, :amount, :currency, :description);
+                    ",
+                    (":date", date), (":amount", amount), (":currency", currency), (":description", description)
+                );
+
+                transaction.Commit();
+            }
+
+            return lastRowId;
         }
 
         /*
@@ -43,7 +71,7 @@ namespace API.DAO
          * added as its decendant. Finally, 'C' will be inserted into 'Accounts'. Since 'C' has no descendants, the
          * 'AncestorTo' table will not be further modified.
          */
-        public void AddAccount(string accountString)
+        private void AddAccount(string accountString)
         {
             using (var connection = GetConnection())
             {
@@ -63,11 +91,13 @@ namespace API.DAO
                     foreach (string descendant in descendants.Split('.')) // for each descendant
                     {
                         // Link the ancestor to the descendant
-                        this.ExecuteCommand(connection, @"
-                                    INSERT INTO AncestorTo(ancestorName, descendantName)
-                                    VALUES(:ancestorName, :descendantName);
-                                ",
-                                (":ancestorName", accountName), (":descendantName", descendant));
+                        this.ExecuteCommand(connection,
+                            @"
+                                INSERT INTO AncestorTo(ancestorName, descendantName)
+                                VALUES(:ancestorName, :descendantName);
+                            ",
+                            (":ancestorName", accountName), (":descendantName", descendant)
+                        );
                     }
 
                     // Remove the ancestor from the account string
@@ -78,13 +108,20 @@ namespace API.DAO
             }
         }
 
-        public void AddTag(string name)
+        private void AddTag(string name, Int64 transactionId)
         {
             using (var connection = this.GetConnection())
             {
                 var transaction = connection.BeginTransaction();
 
                 this.ExecuteCommand(connection, "INSERT INTO Tags(name) VALUES(:name);", (":name", name));
+                this.ExecuteCommand(connection,
+                    @"
+                        INSERT INTO Categorizes(tagName, transactionId)
+                        VALUES(:tagName, :transactionId);
+                    ",
+                    (":tagName", name), (":transactionId", transactionId)
+                );
 
                 transaction.Commit();
             }
@@ -224,6 +261,14 @@ namespace API.DAO
             return connection;
         }
 
+        private object ExecuteScalarCommand(SqliteConnection connection, string commandString,
+                                            params (string, object)[] parameters)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = commandString;
+            return command.ExecuteScalar();
+        }
+
         private void ExecuteCommand(SqliteConnection connection, string commandString)
         {
             SqliteCommand command = connection.CreateCommand();
@@ -232,7 +277,7 @@ namespace API.DAO
         }
 
         private void ExecuteCommand(SqliteConnection connection, string commandString,
-                                    params (string, Object)[] parameters)
+                                    params (string, object)[] parameters)
         {
             var command = connection.CreateCommand();
             command.CommandText = commandString;
