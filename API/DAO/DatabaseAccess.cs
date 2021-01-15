@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Data.Sqlite;
 
 namespace API.DAO
@@ -5,13 +6,16 @@ namespace API.DAO
     public class DatabaseAccess
     {
         private readonly string connectionString;
-        
-        public DatabaseAccess(string connectionString) {
+
+        public DatabaseAccess(string connectionString)
+        {
             this.connectionString = connectionString;
         }
 
-        public void CreateSchema() {
-            using (var connection = GetConnection()) {
+        public void CreateSchema()
+        {
+            using (var connection = GetConnection())
+            {
                 SqliteTransaction transaction = connection.BeginTransaction();
 
                 this.ExecuteCommand(connection, @"
@@ -130,7 +134,8 @@ namespace API.DAO
             }
         }
 
-        private SqliteConnection GetConnection() {
+        private SqliteConnection GetConnection()
+        {
             SqliteConnection connection = new SqliteConnection(this.connectionString);
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = "PRAGMA foreign_keys = ON;";
@@ -141,7 +146,8 @@ namespace API.DAO
             return connection;
         }
 
-        private void ExecuteCommand(SqliteConnection connection, string commandString) {
+        private void ExecuteCommand(SqliteConnection connection, string commandString)
+        {
             SqliteCommand command = connection.CreateCommand();
             command.CommandText = commandString;
             command.ExecuteNonQuery();
