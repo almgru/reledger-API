@@ -17,8 +17,10 @@ namespace API.DAO
                                    DateTime date, string description, List<string> tags,
                                    List<(string, byte[])> attachments)
         {
-            this.InsertAccountAndLinkToDescendants(debitAccount);
-            this.InsertAccountAndLinkToDescendants(creditAccount);
+            this.InsertAccount(debitAccount);
+            this.LinkAncestorAccountsToDescendantAccounts(debitAccount);
+            this.InsertAccount(creditAccount);
+            this.LinkAncestorAccountsToDescendantAccounts(creditAccount);
 
             Int64 id = this.InsertTransaction(amount, currency, date, description);
 
@@ -60,38 +62,19 @@ namespace API.DAO
         }
 
         /*
-         * Insert all accounts specified in the accountString and registers any ancestors/descendants by
-         * inserting into the AncestorTo table.
+         * Insert all accounts specified in the accountString.
          *
-         * The insertion happens in the order most ancestral to most descendant.
-         *
-         * Example:
-         *
-         * AddAccount("A.B.C") will first insert account 'A' to the 'Accounts' table and add 'B' and 'C' as descendants
-         * of 'A' by adding them to the 'AncestorOf' table. Next, 'B' will be inserted into 'Accounts' and 'C' will be
-         * added as its decendant. Finally, 'C' will be inserted into 'Accounts'. Since 'C' has no descendants, the
-         * 'AncestorTo' table will not be further modified.
+         * The insertion order is left to right or most ancestral to most descendant.
          */
-        private void InsertAccountAndLinkToDescendants(string accountString)
+        private void InsertAccount(string accountString)
         {
             using (var connection = GetConnection())
             {
                 SqliteTransaction transaction = connection.BeginTransaction();
 
-                while (accountString != "") // Repeat until no more account names in the account string
+                foreach (string account in accountString.Split("."))
                 {
-                    // Extract first account name as ancestor and the rest of the string as its descendants
-                    int indexOfDot = accountString.IndexOf('.');
-                    string accountName = accountString.Substring(0, indexOfDot);
-                    string descendants = accountString.Substring(indexOfDot);
-
-                    this.ExecuteCommand(connection, "INSERT INTO Accounts(name) VALUES(:name);",
-                                        (":name", accountName));
-
-                    this.LinkAncestorAccountToDescendantAccounts(connection, accountName, descendants);
-
-                    // Remove the ancestor from the account string
-                    accountString = accountString.Remove(0, indexOfDot).Trim();
+                    this.ExecuteCommand(connection, "INSERT INTO Accounts(name) VALUES($name);", ("$name", account));
                 }
 
                 transaction.Commit();
@@ -128,18 +111,49 @@ namespace API.DAO
             }
         }
 
-        private void LinkAncestorAccountToDescendantAccounts(SqliteConnection connection, string ancestorName,
-                                                             string descendantString)
+        /*
+         * Links all ancestor accounts to its descendants (as specified by 'accountString') by inserting into the
+         * AncestorTo table.
+         *
+         * Example:
+         *
+         * AddAccount("A.B.C") will first add 'B' and 'C' as descendants of 'A' and then 'C' as a descendant of 'B'.
+         */
+        private void LinkAncestorAccountsToDescendantAccounts(string accountString)
         {
-            foreach (string descendant in descendantString.Split('.'))
+            using (var connection = GetConnection())
             {
-                this.ExecuteCommand(connection,
-                    @"
-                        INSERT INTO AncestorTo(ancestorName, descendantName)
-                        VALUES(:ancestorName, :descendantName);
-                    ",
-                    (":ancestorName", ancestorName), (":descendantName", descendant)
-                );
+                SqliteTransaction transaction = connection.BeginTransaction();
+
+                while (accountString != "") // Repeat until no more account names in the account string
+                {
+                    // Extract first account name as ancestor and the rest of the string as its descendants
+                    int indexOfDot = accountString.IndexOf('.');
+
+                    if (indexOfDot == -1)
+                    {
+                        break;
+                    }
+
+                    string accountName = accountString.Substring(0, indexOfDot);
+                    string descendants = accountString.Substring(indexOfDot + 1);
+
+                    foreach (string descendant in descendants.Split("."))
+                    {
+                        this.ExecuteCommand(connection,
+                            @"
+                                INSERT INTO AncestorTo(ancestorName, descendantName)
+                                VALUES(:ancestorName, :descendantName);
+                            ",
+                            (":ancestorName", accountName), (":descendantName", descendant)
+                        );
+                    }
+
+                    // Remove the ancestor from the account string
+                    accountString = accountString.Remove(0, indexOfDot + 1).Trim();
+                }
+
+                transaction.Commit();
             }
         }
 
