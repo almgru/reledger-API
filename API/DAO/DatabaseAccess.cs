@@ -47,13 +47,15 @@ namespace API.DAO
             {
                 var transaction = connection.BeginTransaction();
 
-                lastRowId = (Int64)this.ExecuteScalarCommand(connection,
+                this.ExecuteCommand(connection,
                     @"
                         INSERT INTO Transactions(date, amount, currency, description)
                         VALUES(:date, :amount, :currency, :description);
                     ",
                     (":date", date), (":amount", amount), (":currency", currency), (":description", description)
                 );
+
+                lastRowId = (Int64)this.ExecuteScalarCommand(connection, "SELECT last_insert_rowid();");
 
                 transaction.Commit();
             }
