@@ -40,6 +40,16 @@ namespace API.DAO
             }
         }
 
+        public IEnumerable<string> SelectAllTransactions()
+        {
+            return new List<string> { "Hello", ",", "world", "!" };
+        }
+
+        public string SelectTransactionById(int id)
+        {
+            return "Hello world";
+        }
+
         private Int64 InsertTransaction(decimal amount, string currency, DateTime date, string description)
         {
             Int64 lastRowId;

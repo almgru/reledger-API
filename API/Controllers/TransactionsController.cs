@@ -15,5 +15,17 @@ namespace API.Controllers
         {
             this.databaseAccess = databaseAccess;
         }
+
+        [HttpGet]
+        public IEnumerable<string> GetTransactions()
+        {
+            return this.databaseAccess.SelectAllTransactions();
+        }
+
+        [HttpGet("{id}")]
+        public string GetTransactions(int id)
+        {
+            return this.databaseAccess.SelectTransactionById(id);
+        }
     }
 }
