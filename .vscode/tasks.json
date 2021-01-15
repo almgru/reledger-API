@@ -7,8 +7,6 @@
             "type": "process",
             "args": [
                 "build",
-                "--project",
-                "API",
                 "${workspaceFolder}/API/API.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
