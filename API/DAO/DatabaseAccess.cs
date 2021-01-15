@@ -14,8 +14,8 @@ namespace API.DAO
         }
 
         public void AddTransaction(string debitAccount, decimal amount, string currency, string creditAccount,
-                                   DateTime date, string description, List<string> tags,
-                                   List<(string, byte[])> attachments)
+                                   DateTime date, string description, IEnumerable<string> tags,
+                                   IEnumerable<(string, byte[])> attachments)
         {
             this.InsertAccount(debitAccount);
             this.LinkAncestorAccountsToDescendantAccounts(debitAccount);
