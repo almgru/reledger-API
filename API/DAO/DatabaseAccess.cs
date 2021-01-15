@@ -17,14 +17,15 @@ namespace API.DAO
                                    DateTime date, string description, List<string> tags,
                                    List<(string, byte[])> attachments)
         {
-            this.AddAccount(debitAccount);
-            this.AddAccount(creditAccount);
+            this.InsertAccountAndLinkToDescendants(debitAccount);
+            this.InsertAccountAndLinkToDescendants(creditAccount);
 
-            Int64 id = this.AddTransaction(amount, currency, date, description);
+            Int64 id = this.InsertTransaction(amount, currency, date, description);
 
             foreach (string tag in tags)
             {
-                this.AddTag(tag, id);
+                this.InsertTag(tag);
+                this.LinkTagToTransaction(tag, id);
             }
 
             this.LinkTransactionToDebitAccount(id, debitAccount);
@@ -32,11 +33,11 @@ namespace API.DAO
 
             foreach ((string, byte[]) tuple in attachments)
             {
-                this.AddAttachment(tuple.Item1, id, tuple.Item2);
+                this.InsertAttachment(tuple.Item1, id, tuple.Item2);
             }
         }
 
-        private Int64 AddTransaction(decimal amount, string currency, DateTime date, string description)
+        private Int64 InsertTransaction(decimal amount, string currency, DateTime date, string description)
         {
             Int64 lastRowId;
 
@@ -71,7 +72,7 @@ namespace API.DAO
          * added as its decendant. Finally, 'C' will be inserted into 'Accounts'. Since 'C' has no descendants, the
          * 'AncestorTo' table will not be further modified.
          */
-        private void AddAccount(string accountString)
+        private void InsertAccountAndLinkToDescendants(string accountString)
         {
             using (var connection = GetConnection())
             {
@@ -84,21 +85,10 @@ namespace API.DAO
                     string accountName = accountString.Substring(0, indexOfDot);
                     string descendants = accountString.Substring(indexOfDot);
 
-                    // Add the ancestor
                     this.ExecuteCommand(connection, "INSERT INTO Accounts(name) VALUES(:name);",
                                         (":name", accountName));
 
-                    foreach (string descendant in descendants.Split('.')) // for each descendant
-                    {
-                        // Link the ancestor to the descendant
-                        this.ExecuteCommand(connection,
-                            @"
-                                INSERT INTO AncestorTo(ancestorName, descendantName)
-                                VALUES(:ancestorName, :descendantName);
-                            ",
-                            (":ancestorName", accountName), (":descendantName", descendant)
-                        );
-                    }
+                    this.LinkAncestorAccountToDescendantAccounts(connection, accountName, descendants);
 
                     // Remove the ancestor from the account string
                     accountString = accountString.Remove(0, indexOfDot).Trim();
@@ -108,22 +98,48 @@ namespace API.DAO
             }
         }
 
-        private void AddTag(string name, Int64 transactionId)
+        private void InsertTag(string name)
         {
             using (var connection = this.GetConnection())
             {
                 var transaction = connection.BeginTransaction();
 
                 this.ExecuteCommand(connection, "INSERT INTO Tags(name) VALUES(:name);", (":name", name));
+
+                transaction.Commit();
+            }
+        }
+
+        private void InsertAttachment(string name, Int64 transactionId, byte[] data)
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
                 this.ExecuteCommand(connection,
                     @"
-                        INSERT INTO Categorizes(tagName, transactionId)
-                        VALUES(:tagName, :transactionId);
+                        INSERT INTO Attachments(name, transactionId, data)
+                        VALUES(:name, :transactionId, :data);
                     ",
-                    (":tagName", name), (":transactionId", transactionId)
+                    (":name", name), (":transactionId", transactionId), (":data", data)
                 );
 
                 transaction.Commit();
+            }
+        }
+
+        private void LinkAncestorAccountToDescendantAccounts(SqliteConnection connection, string ancestorName,
+                                                             string descendantString)
+        {
+            foreach (string descendant in descendantString.Split('.'))
+            {
+                this.ExecuteCommand(connection,
+                    @"
+                        INSERT INTO AncestorTo(ancestorName, descendantName)
+                        VALUES(:ancestorName, :descendantName);
+                    ",
+                    (":ancestorName", ancestorName), (":descendantName", descendant)
+                );
             }
         }
 
@@ -163,7 +179,7 @@ namespace API.DAO
             }
         }
 
-        private void AddAttachment(string name, Int64 transactionId, byte[] data)
+        private void LinkTagToTransaction(string tagName, Int64 transactionId)
         {
             using (var connection = this.GetConnection())
             {
@@ -171,10 +187,10 @@ namespace API.DAO
 
                 this.ExecuteCommand(connection,
                     @"
-                        INSERT INTO Attachments(name, transactionId, data)
-                        VALUES(:name, :transactionId, :data);
+                        INSERT INTO Categorizes(tagName, transactionId)
+                        VALUES(:tagName, :transactionId);
                     ",
-                    (":name", name), (":transactionId", transactionId), (":data", data)
+                    (":tagName", tagName), (":transactionId", transactionId)
                 );
 
                 transaction.Commit();
