@@ -17,25 +17,23 @@ namespace API.DAO
                                    DateTime date, string description, List<string> tags,
                                    List<(string, byte[])> attachments)
         {
-            // 1. Insert debit account into database in case its missing
             this.AddAccount(debitAccount);
-            // 2. Insert credit account into database in case its missing
             this.AddAccount(creditAccount);
-            // 3. Insert the transaction into the database
+
             Int64 id = this.AddTransaction(amount, currency, date, description);
-            // 4. Add all tags into the database in case any are missing
+
             foreach (string tag in tags)
             {
                 this.AddTag(tag, id);
             }
-            // 5. Link the transaction to the debited account by inserting its ID and the debit account name into the
-            //    'Debits' table.
+
             this.LinkTransactionToDebitAccount(id, debitAccount);
-            // 6. Link the transaction to the credited account by inserting its ID and the credit account name into the
-            //    'Credits' table.
             this.LinkTransactionToCreditAccount(id, creditAccount);
-            // 7. For each attachment, link it to the transaction by inserting the transaction ID, the attachment name,
-            //    and the binary blob into the 'Attachments' table.
+
+            foreach ((string, byte[]) tuple in attachments)
+            {
+                this.AddAttachment(tuple.Item1, id, tuple.Item2);
+            }
         }
 
         private Int64 AddTransaction(decimal amount, string currency, DateTime date, string description)
@@ -159,6 +157,24 @@ namespace API.DAO
                         VALUES(:transactionId, :accountName);
                     ",
                     (":transactionId", transactionId), (":accountName", accountName)
+                );
+
+                transaction.Commit();
+            }
+        }
+
+        private void AddAttachment(string name, Int64 transactionId, byte[] data)
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                this.ExecuteCommand(connection,
+                    @"
+                        INSERT INTO Attachments(name, transactionId, data)
+                        VALUES(:name, :transactionId, :data);
+                    ",
+                    (":name", name), (":transactionId", transactionId), (":data", data)
                 );
 
                 transaction.Commit();
