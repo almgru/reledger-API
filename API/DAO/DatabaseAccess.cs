@@ -30,8 +30,10 @@ namespace API.DAO
             }
             // 5. Link the transaction to the debited account by inserting its ID and the debit account name into the
             //    'Debits' table.
+            this.LinkTransactionToDebitAccount(id, debitAccount);
             // 6. Link the transaction to the credited account by inserting its ID and the credit account name into the
             //    'Credits' table.
+            this.LinkTransactionToCreditAccount(id, creditAccount);
             // 7. For each attachment, link it to the transaction by inserting the transaction ID, the attachment name,
             //    and the binary blob into the 'Attachments' table.
         }
@@ -121,6 +123,42 @@ namespace API.DAO
                         VALUES(:tagName, :transactionId);
                     ",
                     (":tagName", name), (":transactionId", transactionId)
+                );
+
+                transaction.Commit();
+            }
+        }
+
+        private void LinkTransactionToDebitAccount(Int64 transactionId, string accountName)
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                this.ExecuteCommand(connection,
+                    @"
+                        INSERT INTO Debits(transactionId, accountName)
+                        VALUES(:transactionId, :accountName);
+                    ",
+                    (":transactionId", transactionId), (":accountName", accountName)
+                );
+
+                transaction.Commit();
+            }
+        }
+
+        private void LinkTransactionToCreditAccount(Int64 transactionId, string accountName)
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                this.ExecuteCommand(connection,
+                    @"
+                        INSERT INTO Credits(transactionId, accountName)
+                        VALUES(:transactionId, :accountName);
+                    ",
+                    (":transactionId", transactionId), (":accountName", accountName)
                 );
 
                 transaction.Commit();
