@@ -350,6 +350,7 @@ namespace API.DAO
         {
             var command = connection.CreateCommand();
             command.CommandText = commandString;
+            this.AddParametersToCommand(command, parameters);
             return command.ExecuteScalar();
         }
 
@@ -365,13 +366,16 @@ namespace API.DAO
         {
             var command = connection.CreateCommand();
             command.CommandText = commandString;
+            this.AddParametersToCommand(command, parameters);
+            command.ExecuteNonQuery();
+        }
 
+        private void AddParametersToCommand(SqliteCommand command, params (string, object)[] parameters)
+        {
             foreach ((string, Object) tuple in parameters)
             {
                 command.Parameters.AddWithValue(tuple.Item1, tuple.Item2);
             }
-
-            command.ExecuteNonQuery();
         }
     }
 }
