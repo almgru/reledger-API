@@ -313,7 +313,7 @@ namespace API.DAO
                         ON DELETE CASCADE,
 
                         FOREIGN KEY(accountName)
-                        REFERENCES Account(name)
+                        REFERENCES Accounts(name)
                         ON UPDATE CASCADE
                         ON DELETE CASCADE
                     )
