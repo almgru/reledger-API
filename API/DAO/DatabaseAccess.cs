@@ -78,6 +78,18 @@ namespace API.DAO
             }
         }
 
+        public void AddTag(string name)
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                this.ExecuteCommand(connection, "INSERT INTO Tags(name) VALUES(:name);", (":name", name));
+
+                transaction.Commit();
+            }
+        }
+
         public void CreateSchema()
         {
             using (var connection = GetConnection())
