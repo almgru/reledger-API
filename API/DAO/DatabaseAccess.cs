@@ -74,9 +74,15 @@ namespace API.DAO
             {
                 SqliteTransaction transaction = connection.BeginTransaction();
 
-                foreach (string account in accountString.Split("."))
+                while (accountString != "")
                 {
-                    this.ExecuteCommand(connection, "INSERT INTO Accounts(name) VALUES($name);", ("$name", account));
+                    this.ExecuteCommand(connection, "INSERT INTO Accounts(name) VALUES($name);",
+                                        ("$name", accountString.Trim()));
+
+                    int rightMostDotIndex = accountString.LastIndexOf(".");
+                    accountString = rightMostDotIndex != -1 ?
+                                    accountString.Substring(0, rightMostDotIndex) :
+                                    "";
                 }
 
                 transaction.Commit();
@@ -119,40 +125,46 @@ namespace API.DAO
          *
          * Example:
          *
-         * AddAccount("A.B.C") will first add 'B' and 'C' as descendants of 'A' and then 'C' as a descendant of 'B'.
+         * AddAccount("A.B.C") will add 'A.B.C' and 'A.B' as descendants of 'A' and 'A.B.C' as a descendant of 'A.B'.
          */
         private void LinkAncestorAccountsToDescendantAccounts(string accountString)
         {
             using (var connection = GetConnection())
             {
                 SqliteTransaction transaction = connection.BeginTransaction();
+                // Store a copy of the original account string so we can use that as a starting point for descendants
+                string original = accountString;
+                int rightMostDotIndex;
 
-                while (accountString != "") // Repeat until no more account names in the account string
+                /*
+                 * We start with by getting the rightmost ancestor (for example "A.B" in account string "A.B.C" ["A.B.C"
+                 * is not an ancestor since it has no descendents]) and work our way up to more ancestral accounts
+                 * (First "A.B", then the ancestor of "A.B": "A").
+                 *
+                 * For each ancestor we determine its descendants by using the original account string as a starting
+                 * point and working our way upwards until the descendant has the same account name as the current
+                 * ancestor (So the descendant of "A.B" becomes "A.B.C" and the descendant of "A" is first "A.B.C" and
+                 * then "A.B").
+                 */
+                while ((rightMostDotIndex = accountString.LastIndexOf(".")) != -1) // until no more ancestors
                 {
-                    // Extract first account name as ancestor and the rest of the string as its descendants
-                    int indexOfDot = accountString.IndexOf('.');
+                    string ancestor = accountString.Substring(0, rightMostDotIndex).Trim();
+                    string descendant = original;
 
-                    if (indexOfDot == -1)
-                    {
-                        break;
-                    }
-
-                    string accountName = accountString.Substring(0, indexOfDot);
-                    string descendants = accountString.Substring(indexOfDot + 1);
-
-                    foreach (string descendant in descendants.Split("."))
+                    while (descendant != ancestor)
                     {
                         this.ExecuteCommand(connection,
                             @"
                                 INSERT INTO AncestorTo(ancestorName, descendantName)
                                 VALUES(:ancestorName, :descendantName);
                             ",
-                            (":ancestorName", accountName), (":descendantName", descendant)
+                            (":ancestorName", ancestor), (":descendantName", descendant)
                         );
+
+                        descendant = descendant.Substring(0, descendant.LastIndexOf(".")).Trim();
                     }
 
-                    // Remove the ancestor from the account string
-                    accountString = accountString.Remove(0, indexOfDot + 1).Trim();
+                    accountString = accountString.Substring(0, rightMostDotIndex).Trim();
                 }
 
                 transaction.Commit();
