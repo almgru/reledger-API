@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
+using API.DAO;
+
 namespace API
 {
     public class Startup
@@ -19,6 +21,8 @@ namespace API
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            DatabaseAccess dao = new DatabaseAccess(Configuration["DbConnectionString"]);
+            dao.CreateSchema();
         }
 
         public IConfiguration Configuration { get; }
