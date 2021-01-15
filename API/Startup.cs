@@ -22,7 +22,6 @@ namespace API
         {
             Configuration = configuration;
             DatabaseAccess dao = new DatabaseAccess(Configuration["DbConnectionString"]);
-            dao.CreateSchema();
         }
 
         public IConfiguration Configuration { get; }

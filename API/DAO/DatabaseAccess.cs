@@ -11,6 +11,7 @@ namespace API.DAO
         public DatabaseAccess(string connectionString)
         {
             this.connectionString = connectionString;
+            this.CreateSchema();
         }
 
         public void AddTransaction(string debitAccount, decimal amount, string currency, string creditAccount,
@@ -225,14 +226,14 @@ namespace API.DAO
             }
         }
 
-        public void CreateSchema()
+        private void CreateSchema()
         {
             using (var connection = GetConnection())
             {
                 SqliteTransaction transaction = connection.BeginTransaction();
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Transactions(
+                    CREATE TABLE IF NOT EXISTS Transactions(
                         id INTEGER PRIMARY KEY NOT NULL,
                         date TEXT NOT NULL,
                         amount TEXT NOT NULL,
@@ -242,7 +243,7 @@ namespace API.DAO
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Attachments(
+                    CREATE TABLE IF NOT EXISTS Attachments(
                         name TEXT NOT NULL,
                         transactionId INTEGER NOT NULL,
                         data BLOB NOT NULL,
@@ -257,13 +258,13 @@ namespace API.DAO
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Tags(
+                    CREATE TABLE IF NOT EXISTS Tags(
                         name TEXT PRIMARY KEY NOT NULL
                     );
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Categorizes(
+                    CREATE TABLE IF NOT EXISTS Categorizes(
                         tagName TEXT NOT NULL,
                         transactionId INTEGER NOT NULL,
 
@@ -282,7 +283,7 @@ namespace API.DAO
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Debits(
+                    CREATE TABLE IF NOT EXISTS Debits(
                         transactionId INTEGER NOT NULL,
                         accountName TEXT NOT NULL,
 
@@ -301,7 +302,7 @@ namespace API.DAO
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Credits(
+                    CREATE TABLE IF NOT EXISTS Credits(
                         transactionId INTEGER NOT NULL,
                         accountName TEXT NOT NULL,
 
@@ -320,13 +321,13 @@ namespace API.DAO
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE Accounts(
+                    CREATE TABLE IF NOT EXISTS Accounts(
                         name TEXT PRIMARY KEY NOT NULL
                     );
                 ");
 
                 this.ExecuteCommand(connection, @"
-                    CREATE TABLE AncestorTo(
+                    CREATE TABLE IF NOT EXISTS AncestorTo(
                         ancestorName TEXT NOT NULL,
                         descendantName TEXT NOT NULL,
 
