@@ -12,8 +12,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
-using API.DAO;
-
 namespace API
 {
     public class Startup
@@ -33,9 +31,6 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            services.AddSingleton<DatabaseAccess>(x =>
-                ActivatorUtilities.CreateInstance<DatabaseAccess>(x, this.Configuration["DbConnectionString"])
-            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
