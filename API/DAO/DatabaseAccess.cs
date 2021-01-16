@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
 
@@ -12,6 +13,7 @@ namespace API.DAO
         {
             this.connectionString = connectionString;
             this.CreateSchema();
+            this.CreateViews();
         }
 
         public void AddTransaction(string debitAccount, decimal amount, string currency, string creditAccount,
@@ -42,7 +44,10 @@ namespace API.DAO
 
         public IEnumerable<string> SelectAllTransactions()
         {
-            return new List<string> { "Hello", ",", "world", "!" };
+            using (var connection = this.GetConnection())
+            {
+                return this.ExecuteQueryCommand(connection, "SELECT * FROM TransactionInformation;");
+            }
         }
 
         public string SelectTransactionById(int id)
@@ -358,6 +363,33 @@ namespace API.DAO
             }
         }
 
+        private void CreateViews()
+        {
+            using (var connection = this.GetConnection())
+            {
+                var transaction = connection.BeginTransaction();
+
+                this.ExecuteCommand(connection,
+                    @"
+                        CREATE VIEW IF NOT EXISTS TransactionInformation AS
+                        SELECT *
+                        FROM (
+                            SELECT
+                                Transactions.*,
+                                Credits.accountName as creditAccount,
+                                Debits.accountName as debitAccount
+                            FROM
+                                Transactions
+                                JOIN Credits ON Credits.transactionId = Transactions.id
+                                JOIN Debits ON Debits.transactionId = Transactions.id
+                        );
+                    "
+                );
+
+                transaction.Commit();
+            }
+        }
+
         private SqliteConnection GetConnection()
         {
             SqliteConnection connection = new SqliteConnection(this.connectionString);
@@ -377,6 +409,31 @@ namespace API.DAO
             command.CommandText = commandString;
             this.AddParametersToCommand(command, parameters);
             return command.ExecuteScalar();
+        }
+
+        private IEnumerable<string> ExecuteQueryCommand(SqliteConnection connection, string commandString)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = commandString;
+            var result = new List<string>();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    StringBuilder row = new StringBuilder("{");
+
+                    for (int column = 0; column < reader.FieldCount; column++)
+                    {
+                        row.AppendFormat("{0}: {1},", reader.GetName(column), reader.GetString(column));
+                    }
+
+                    row.Append("}");
+                    result.Add(row.ToString());
+                }
+            }
+
+            return result;
         }
 
         private void ExecuteCommand(SqliteConnection connection, string commandString)
