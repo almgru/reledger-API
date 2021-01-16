@@ -34,7 +34,7 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
             services.AddSingleton<DatabaseAccess>(x =>
-                ActivatorUtilities.CreateInstance<DatabaseAccess>(x, this.Configuration["DbConnectionString"]);
+                ActivatorUtilities.CreateInstance<DatabaseAccess>(x, this.Configuration["DbConnectionString"])
             );
         }
 
