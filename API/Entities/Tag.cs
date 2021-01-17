@@ -2,11 +2,7 @@ namespace API.Entities
 {
     public class Tag
     {
-        public Tag(string name)
-        {
-            this.Name = name;
-        }
-
+        public int Id { get; set; }
         public string Name { get; set; }
     }
 }
