@@ -33,6 +33,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddAccount([FromBody] Account account)
         {
+            // TODO: Move this code into DataContext
             // Store a copy of the original account string so we can use that as a starting point for descendants
             string accountString = account.Name;
             string original = accountString;
