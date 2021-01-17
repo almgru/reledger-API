@@ -20,11 +20,36 @@ namespace API.Data
 
         public async Task AddAccountAndDescendantsAsync(Account account)
         {
+            // TODO: Refactor this
+
+            // If account has no descendants or ancestors, just add it if it doesn't exist and return
+            if (account.Name.IndexOf(".") == -1)
+            {
+                await Accounts.AddIfNotExistsAsync(account, acc => acc.Name == account.Name);
+                return;
+            }
+
             // Store a copy of the original account string so we can use that as a starting point for descendants
             string accountString = account.Name;
+
+            // Make sure increase balance behaviour is inherited from parent
+            Account.IncreaseBalanceBehaviour increaseBehaviour;
+            string mostAncestralAccountName = accountString.Substring(0, accountString.IndexOf("."));
+            Account mostAncestralAccount = await Accounts.SingleOrDefaultAsync(
+                acc => acc.Name == mostAncestralAccountName
+            );
+
+            if (mostAncestralAccount != null) // Use ancestor increase behaviour if an ancestor already exists...
+            {
+                increaseBehaviour = mostAncestralAccount.IncreaseBalanceOn;
+            }
+            else // ...otherwise, use the client specified behaviour
+            {
+                increaseBehaviour = account.IncreaseBalanceOn;
+            }
+
             string original = accountString;
             int rightMostDotIndex;
-
             /*
              * We start with by getting the rightmost ancestor (for example "A.B" in account string "A.B.C" ["A.B.C"
              * is not an ancestor since it has no descendants]) and work our way up to more ancestral accounts
@@ -37,9 +62,19 @@ namespace API.Data
              */
             while ((rightMostDotIndex = accountString.LastIndexOf(".")) != -1) // until no more ancestors
             {
+                string ancestorName = accountString.Substring(0, rightMostDotIndex).Trim();
+                string descendantString = original;
+                Account ancestor = await Accounts.SingleOrDefaultAsync(acc => acc.Name == ancestorName);
                 var descendants = new List<Account>();
-                var ancestor = new Account() { Name = accountString.Substring(0, rightMostDotIndex).Trim() };
-                var descendantString = original;
+
+                if (ancestor == null)
+                {
+                    ancestor = new Account()
+                    {
+                        Name = ancestorName,
+                        IncreaseBalanceOn = increaseBehaviour
+                    };
+                }
 
                 while (descendantString != ancestor.Name)
                 {
@@ -53,7 +88,11 @@ namespace API.Data
 
                     if (descendant == null)
                     {
-                        descendant = new Account() { Name = descendantString };
+                        descendant = new Account()
+                        {
+                            Name = descendantString,
+                            IncreaseBalanceOn = increaseBehaviour
+                        };
                         await Accounts.AddAsync(descendant);
                     }
 
@@ -62,7 +101,10 @@ namespace API.Data
                 }
 
                 ancestor.Descendants = descendants;
-                await AddAsync(ancestor);
+
+                await SaveChangesAsync();
+                await Accounts.AddIfNotExistsAsync(ancestor, acc => acc.Name == ancestor.Name);
+
                 accountString = accountString.Substring(0, rightMostDotIndex).Trim();
             }
         }
