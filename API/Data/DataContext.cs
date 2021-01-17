@@ -1,6 +1,8 @@
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace API.Data
@@ -112,6 +114,24 @@ namespace API.Data
                         Balance = 0,
                         IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
                     });
+        }
+    }
+
+    public static class DbSetExtensions
+    {
+        public static async Task<T> AddIfNotExistsAsync<T>(this DbSet<T> dbSet, T entity,
+                                                           Expression<Func<T, bool>> predicate)
+        where T : class, new()
+        {
+            if (await dbSet.AnyAsync(predicate))
+            {
+                return null;
+            }
+            else
+            {
+                await dbSet.AddAsync(entity);
+                return entity;
+            }
         }
     }
 }
