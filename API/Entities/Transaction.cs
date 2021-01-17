@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Entities
 {
@@ -20,9 +22,11 @@ namespace API.Entities
         public string Description { get; set; }
 
         [Required]
+        [ModelBinder(typeof(AccountModelBinder))]
         public Account DebitAccount { get; set; }
 
         [Required]
+        [ModelBinder(typeof(AccountModelBinder))]
         public Account CreditAccount { get; set; }
 
         public IEnumerable<Tag> Tags { get; set; }

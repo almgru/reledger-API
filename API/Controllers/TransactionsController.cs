@@ -31,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task AddTransaction([FromBody] Transaction transaction)
+        public async Task AddTransaction([FromForm] Transaction transaction)
         {
             await context.Transactions.AddAsync(transaction);
             await context.SaveChangesAsync();
