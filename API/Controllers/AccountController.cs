@@ -33,6 +33,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddAccount([FromBody] Account account)
         {
+            // TODO: Add all descendants as well
             await context.Accounts.AddAsync(account);
             await context.SaveChangesAsync();
         }
