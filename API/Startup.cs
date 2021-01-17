@@ -42,6 +42,10 @@ namespace API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            /*
+             * TODO: Add custom exception handler middleware for database errors
+             * See: https://docs.microsoft.com/en-us/archive/blogs/brandonh/using-middleware-to-trap-exceptions-in-asp-net-core
+             */
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
