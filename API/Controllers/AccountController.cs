@@ -31,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async void AddAccount(Account account)
+        public async Task AddAccount([FromBody] Account account)
         {
             await context.Accounts.AddAsync(account);
             await context.SaveChangesAsync();
