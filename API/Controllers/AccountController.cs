@@ -9,31 +9,31 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TransactionsController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly DataContext context;
 
-        public TransactionsController(DataContext context)
+        public AccountController(DataContext context)
         {
             this.context = context;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Transaction>> GetTransactions()
+        public async Task<IEnumerable<Account>> GetAccounts()
         {
-            return await context.Transactions.ToListAsync();
+            return await context.Accounts.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public async Task<Transaction> GetTransaction(int id)
+        public async Task<Account> GetAccount(int id)
         {
-            return await context.Transactions.FindAsync(id);
+            return await context.Accounts.FindAsync(id);
         }
 
         [HttpPost]
-        public async Task AddTransaction([FromBody] Transaction transaction)
+        public async Task AddAccount([FromBody] Account account)
         {
-            await context.Transactions.AddAsync(transaction);
+            await context.Accounts.AddAsync(account);
             await context.SaveChangesAsync();
         }
     }
