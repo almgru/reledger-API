@@ -77,11 +77,41 @@ namespace API.Data
 
             builder.Entity<Account>()
                 .HasData(
-                    new Account() { Id = 1, Name = "Asset", Balance = 0 },
-                    new Account() { Id = 2, Name = "Liability", Balance = 0 },
-                    new Account() { Id = 3, Name = "Income", Balance = 0 },
-                    new Account() { Id = 4, Name = "Expense", Balance = 0 },
-                    new Account() { Id = 5, Name = "Capital", Balance = 0 });
+                    new Account()
+                    {
+                        Id = 1,
+                        Name = "Asset",
+                        Balance = 0,
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnDebit
+                    },
+                    new Account()
+                    {
+                        Id = 2,
+                        Name = "Liability",
+                        Balance = 0,
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                    },
+                    new Account()
+                    {
+                        Id = 3,
+                        Name = "Income",
+                        Balance = 0,
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                    },
+                    new Account()
+                    {
+                        Id = 4,
+                        Name = "Expense",
+                        Balance = 0,
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnDebit
+                    },
+                    new Account()
+                    {
+                        Id = 5,
+                        Name = "Capital",
+                        Balance = 0,
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                    });
         }
     }
 }
