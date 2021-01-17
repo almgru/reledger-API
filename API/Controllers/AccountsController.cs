@@ -9,11 +9,11 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController : ControllerBase
+    public class AccountsController : ControllerBase
     {
         private readonly DataContext context;
 
-        public AccountController(DataContext context)
+        public AccountsController(DataContext context)
         {
             this.context = context;
         }
