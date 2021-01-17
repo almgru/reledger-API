@@ -74,6 +74,14 @@ namespace API.Data
             builder.Entity<Tag>()
                 .HasIndex(tag => tag.Name)
                 .IsUnique();
+
+            builder.Entity<Account>()
+                .HasData(
+                    new Account() { Id = 1, Name = "Asset" },
+                    new Account() { Id = 2, Name = "Liability" },
+                    new Account() { Id = 3, Name = "Income" },
+                    new Account() { Id = 4, Name = "Expense" },
+                    new Account() { Id = 5, Name = "Capital" });
         }
     }
 }
