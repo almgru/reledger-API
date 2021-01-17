@@ -10,6 +10,8 @@ namespace API.Entities
         [Required]
         public string Name { get; set; }
 
+        public decimal Balance { get; set; }
+
         public IEnumerable<Account> Descendants { get; set; }
     }
 }
