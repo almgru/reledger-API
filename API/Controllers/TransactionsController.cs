@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using API.Data;
+using API.Entities;
 
 namespace API.Controllers
 {
@@ -7,16 +11,30 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
     {
-        [HttpGet]
-        public IEnumerable<string> GetTransactions()
+        private readonly DataContext context;
+
+        public TransactionsController(DataContext context)
         {
-            return new List<string>() { "Hello,", "world!" };
+            this.context = context;
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<Transaction>> GetTransactions()
+        {
+            return await context.Transactions.ToListAsync();
         }
 
         [HttpGet("{id}")]
-        public string GetTransactions(int id)
+        public async Task<Transaction> GetTransaction(int id)
         {
-            return "Hello, world!";
+            return await context.Transactions.FindAsync(id);
+        }
+
+        [HttpPost]
+        public async void AddTransaction([FromBody] Transaction transaction)
+        {
+            await context.Transactions.AddAsync(transaction);
+            await context.SaveChangesAsync();
         }
     }
 }
