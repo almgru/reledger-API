@@ -13,5 +13,16 @@ namespace API.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Account>()
+                .HasIndex(acc => acc.Name)
+                .IsUnique();
+
+            builder.Entity<Tag>()
+                .HasIndex(tag => tag.Name)
+                .IsUnique();
+        }
     }
 }
