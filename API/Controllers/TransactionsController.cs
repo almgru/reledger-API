@@ -45,23 +45,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddTransaction([FromForm] Transaction transaction)
         {
-            if (transaction.ToAccount.IncreaseBalanceOn == Account.IncreaseBalanceBehaviour.OnDebit)
-            {
-                transaction.ToAccount.Balance += transaction.Amount;
-            }
-            else
-            {
-                transaction.ToAccount.Balance -= transaction.Amount;
-            }
-
-            if (transaction.FromAccount.IncreaseBalanceOn == Account.IncreaseBalanceBehaviour.OnCredit)
-            {
-                transaction.FromAccount.Balance += transaction.Amount;
-            }
-            else
-            {
-                transaction.FromAccount.Balance -= transaction.Amount;
-            }
+            transaction.FromAccount.Debit(transaction.Amount);
+            transaction.ToAccount.Credit(transaction.Amount);
 
             await context.Transactions.AddAsync(transaction);
             await context.SaveChangesAsync();

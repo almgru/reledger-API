@@ -21,5 +21,39 @@ namespace API.Entities
         public decimal Balance { get; set; }
 
         public IEnumerable<Account> ParentAccounts { get; set; } = Enumerable.Empty<Account>();
+
+        public void Debit(decimal amount)
+        {
+            if (IncreaseBalanceOn == IncreaseBalanceBehaviour.OnDebit)
+            {
+                Balance += amount;
+            }
+            else
+            {
+                Balance -= amount;
+            }
+
+            foreach (Account parent in ParentAccounts)
+            {
+                parent.Debit(amount);
+            }
+        }
+
+        public void Credit(decimal amount)
+        {
+            if (IncreaseBalanceOn == IncreaseBalanceBehaviour.OnCredit)
+            {
+                Balance += amount;
+            }
+            else
+            {
+                Balance -= amount;
+            }
+
+            foreach (Account parent in ParentAccounts)
+            {
+                parent.Credit(amount);
+            }
+        }
     }
 }
