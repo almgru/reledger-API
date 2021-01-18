@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Entities;
+using System;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -22,6 +24,16 @@ namespace API.Controllers
         public async Task<IEnumerable<Transaction>> GetTransactions()
         {
             return await context.Transactions.ToListAsync();
+        }
+
+        [HttpGet]
+        public async Task<IEnumerable<Transaction>> GetTransactionsByDateRange([FromQuery] DateTime startDate,
+                                                                               [FromQuery] DateTime endDate)
+        {
+            return await context.Transactions
+                .Where(t => t.Date >= startDate && t.Date <= endDate)
+                .OrderBy(t => t.Date)
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]
