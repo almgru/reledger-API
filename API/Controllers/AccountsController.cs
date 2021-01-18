@@ -24,10 +24,11 @@ namespace API.Controllers
             return await context.Accounts.ToListAsync();
         }
 
-        [HttpGet("{id}")]
-        public async Task<Account> GetAccount(int id)
+        [HttpGet("{name}")]
+        public async Task<Account> GetAccount(string name)
         {
-            return await context.Accounts.FindAsync(id);
+            return await context.Accounts.SingleOrDefaultAsync(acc =>
+                acc.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
         }
 
         [HttpPost]
