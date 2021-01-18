@@ -33,7 +33,7 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddAccount([FromForm] Account account)
         {
-            await context.AddAccountAndDescendantsAsync(account);
+            await context.AddAccountAndChildrenAsync(account);
             await context.SaveChangesAsync();
         }
     }
