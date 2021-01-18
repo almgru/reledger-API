@@ -18,18 +18,16 @@ namespace API.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
 
-        public async Task AddAccountAndDescendantsAsync(Account account)
+        public async Task AddAccountAndChildrenAsync(Account account)
         {
-            // TODO: Refactor this
-
-            // If account has no descendants or ancestors, just add it if it doesn't exist and return
+            // If account has no children or parents, just add it if it doesn't exist and return
             if (account.Name.IndexOf(".") == -1)
             {
                 await Accounts.AddIfNotExistsAsync(account, acc => acc.Name == account.Name);
                 return;
             }
 
-            // Store a copy of the original account string so we can use that as a starting point for descendants
+            // Store a copy of the original account string so we can use that as a starting point for children
             string accountString = account.Name;
 
             // Make sure increase balance behaviour is inherited from parent
@@ -39,7 +37,7 @@ namespace API.Data
                 acc => acc.Name == mostAncestralAccountName
             );
 
-            if (mostAncestralAccount != null) // Use ancestor increase behaviour if an ancestor already exists...
+            if (mostAncestralAccount != null) // Use parent increase behaviour if a parent already exists...
             {
                 increaseBehaviour = mostAncestralAccount.IncreaseBalanceOn;
             }
@@ -51,64 +49,57 @@ namespace API.Data
             string original = accountString;
             int rightMostDotIndex;
             /*
-             * We start with by getting the rightmost ancestor (for example "A.B" in account string "A.B.C" ["A.B.C"
-             * is not an ancestor since it has no descendants]) and work our way up to more ancestral accounts
-             * (First "A.B", then the ancestor of "A.B": "A").
-             *
-             * For each ancestor we determine its descendants by using the original account string as a starting
-             * point and working our way upwards until the descendant has the same account name as the current
-             * ancestor (So the descendant of "A.B" becomes "A.B.C" and the descendant of "A" is first "A.B.C" and
-             * then "A.B").
+             * We start with getting the rightmost parent (for example "A.B" in account string "A.B.C" ["A.B.C" is not
+             * a parent since it has no children]) and work our way up to more ancestral accounts (First "A.B", then
+             * the parent of "A.B": "A").
              */
-            while ((rightMostDotIndex = accountString.LastIndexOf(".")) != -1) // until no more ancestors
+            while ((rightMostDotIndex = accountString.LastIndexOf(".")) != -1) // until no more parents
             {
-                string ancestorName = accountString.Substring(0, rightMostDotIndex).Trim();
-                string descendantString = original;
-                Account ancestor = await Accounts.SingleOrDefaultAsync(acc => acc.Name == ancestorName);
-                var descendants = new List<Account>();
+                string parentName = accountString.Substring(0, rightMostDotIndex).Trim();
+                string childString = original;
+                Account parent = await Accounts.SingleOrDefaultAsync(acc => acc.Name == parentName);
 
-                if (ancestor == null)
+                if (parent == null)
                 {
-                    ancestor = new Account()
+                    parent = new Account()
                     {
-                        Name = ancestorName,
+                        Name = parentName,
                         IncreaseBalanceOn = increaseBehaviour
                     };
                 }
 
-                var parents = new List<Account>();
-                while (descendantString != ancestor.Name)
+                /*
+                 * For each parent we determine its children by using the original account string as a starting point
+                 * and working our way upwards until the child has the same account name as the current parent (So with 
+                 * the previous example of "A.B.C", the child of "A.B" becomes "A.B.C" and the child of "A" is first
+                 * "A.B.C" and then "A.B").
+                 */
+                while (childString != parent.Name)
                 {
                     /*
-                     * Commit changes so the next query will be able to find the current descendant if it exists in the
+                     * Commit changes so the next query will be able to find the current child if it exists in the
                      * database.
                      */
                     await SaveChangesAsync();
 
-                    var descendant = await Accounts.SingleOrDefaultAsync(acc => acc.Name == descendantString);
+                    var child = await Accounts.SingleOrDefaultAsync(acc => acc.Name == childString);
 
-                    if (descendant == null)
+                    if (child == null)
                     {
-                        parents = new List<Account>();
-                        descendant = new Account()
+                        child = new Account()
                         {
-                            Name = descendantString,
+                            Name = childString,
                             IncreaseBalanceOn = increaseBehaviour
                         };
-                        await Accounts.AddAsync(descendant);
-                    }
-                    else
-                    {
-                        parents = new List<Account>(descendant.ParentAccounts);
+                        await Accounts.AddAsync(child);
                     }
 
-                    parents.Add(ancestor);
-                    descendant.ParentAccounts = parents;
-                    descendantString = descendantString.Substring(0, descendantString.LastIndexOf(".")).Trim();
+                    child.ParentAccounts = new List<Account>(child.ParentAccounts) { parent };
+                    childString = childString.Substring(0, childString.LastIndexOf(".")).Trim();
                 }
 
                 await SaveChangesAsync();
-                await Accounts.AddIfNotExistsAsync(ancestor, acc => acc.Name == ancestor.Name);
+                await Accounts.AddIfNotExistsAsync(parent, acc => acc.Name == parent.Name);
 
                 accountString = accountString.Substring(0, rightMostDotIndex).Trim();
             }
