@@ -94,7 +94,11 @@ namespace API.Data
                         await Accounts.AddAsync(child);
                     }
 
-                    child.ParentAccounts = new List<Account>(child.ParentAccounts) { parent };
+                    if (child.Parent == null)
+                    {
+                        child.Parent = parent;
+                    }
+
                     childString = childString.Substring(0, childString.LastIndexOf(".")).Trim();
                 }
 

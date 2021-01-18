@@ -6,11 +6,6 @@ namespace API.Entities
 {
     public class Account
     {
-        public Account()
-        {
-            ParentAccounts = new List<Account>();
-        }
-
         public enum IncreaseBalanceBehaviour
         {
             OnDebit, OnCredit
@@ -25,7 +20,7 @@ namespace API.Entities
 
         public decimal Balance { get; set; }
 
-        public IEnumerable<Account> ParentAccounts { get; set; }
+        public Account Parent { get; set; }
 
         public void Debit(decimal amount)
         {
@@ -38,10 +33,7 @@ namespace API.Entities
                 Balance -= amount;
             }
 
-            foreach (Account parent in ParentAccounts)
-            {
-                parent.Debit(amount);
-            }
+            Parent?.Debit(amount);
         }
 
         public void Credit(decimal amount)
@@ -55,10 +47,7 @@ namespace API.Entities
                 Balance -= amount;
             }
 
-            foreach (Account parent in ParentAccounts)
-            {
-                parent.Credit(amount);
-            }
+            Parent?.Credit(amount);
         }
     }
 }

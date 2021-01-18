@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using API.Entities;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace API.Data
 {
@@ -32,6 +34,8 @@ namespace API.Data
             string camelCasedModelName = bindingContext.ModelName.Replace(firstModelNameCharacter,
                                                                           firstModelNameCharacter.ToLower());
             string value = bindingContext.HttpContext.Request.Form[camelCasedModelName];
+
+            await this.context.Accounts.LoadAsync(); // TODO: Potential performance issue
             Account account = await this.context.Accounts.SingleOrDefaultAsync(acc => acc.Name == value);
 
             if (account == null)
