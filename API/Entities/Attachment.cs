@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace API.Entities
@@ -10,6 +11,6 @@ namespace API.Entities
         public string Name { get; set; }
 
         [Required]
-        public byte[] Data { get; set; }
+        public byte[] Data { get; set; } = Array.Empty<byte>();
     }
 }

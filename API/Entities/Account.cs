@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace API.Entities
 {
@@ -19,6 +20,6 @@ namespace API.Entities
 
         public decimal Balance { get; set; }
 
-        public IEnumerable<Account> Descendants { get; set; }
+        public IEnumerable<Account> Descendants { get; set; } = Enumerable.Empty<Account>();
     }
 }

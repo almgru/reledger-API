@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using API.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,8 +30,8 @@ namespace API.Entities
         [ModelBinder(typeof(AccountModelBinder))]
         public Account FromAccount { get; set; }
 
-        public IEnumerable<Tag> Tags { get; set; }
+        public IEnumerable<Tag> Tags { get; set; } = Enumerable.Empty<Tag>();
 
-        public IEnumerable<Attachment> Attachments { get; set; }
+        public IEnumerable<Attachment> Attachments { get; set; } = Enumerable.Empty<Attachment>();
     }
 }
