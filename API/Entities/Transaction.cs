@@ -9,6 +9,12 @@ namespace API.Entities
 {
     public class Transaction
     {
+        public Transaction()
+        {
+            Tags = new List<Tag>();
+            Attachments = new List<Attachment>();
+        }
+
         public int Id { get; set; }
 
         [Required]
@@ -30,8 +36,8 @@ namespace API.Entities
         [ModelBinder(typeof(AccountModelBinder))]
         public Account FromAccount { get; set; }
 
-        public IEnumerable<Tag> Tags { get; set; } = Enumerable.Empty<Tag>();
+        public IEnumerable<Tag> Tags { get; set; }
 
-        public IEnumerable<Attachment> Attachments { get; set; } = Enumerable.Empty<Attachment>();
+        public IEnumerable<Attachment> Attachments { get; set; }
     }
 }
