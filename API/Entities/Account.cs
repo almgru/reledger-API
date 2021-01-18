@@ -20,6 +20,6 @@ namespace API.Entities
 
         public decimal Balance { get; set; }
 
-        public IEnumerable<Account> Descendants { get; set; } = Enumerable.Empty<Account>();
+        public IEnumerable<Account> ParentAccounts { get; set; } = Enumerable.Empty<Account>();
     }
 }

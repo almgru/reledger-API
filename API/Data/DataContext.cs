@@ -76,6 +76,7 @@ namespace API.Data
                     };
                 }
 
+                var parents = new List<Account>();
                 while (descendantString != ancestor.Name)
                 {
                     /*
@@ -88,6 +89,7 @@ namespace API.Data
 
                     if (descendant == null)
                     {
+                        parents = new List<Account>();
                         descendant = new Account()
                         {
                             Name = descendantString,
@@ -95,12 +97,15 @@ namespace API.Data
                         };
                         await Accounts.AddAsync(descendant);
                     }
+                    else
+                    {
+                        parents = new List<Account>(descendant.ParentAccounts);
+                    }
 
-                    descendants.Add(descendant);
+                    parents.Add(ancestor);
+                    descendant.ParentAccounts = parents;
                     descendantString = descendantString.Substring(0, descendantString.LastIndexOf(".")).Trim();
                 }
-
-                ancestor.Descendants = descendants;
 
                 await SaveChangesAsync();
                 await Accounts.AddIfNotExistsAsync(ancestor, acc => acc.Name == ancestor.Name);
