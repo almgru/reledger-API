@@ -28,7 +28,7 @@ namespace API.Controllers
         public async Task<Account> GetAccount(string name)
         {
             return await context.Accounts.SingleOrDefaultAsync(acc =>
-                acc.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
+                acc.Name == name.Replace(name[0], char.ToUpper(name[0]))); // Capitalize 'name' and compare
         }
 
         [HttpPost]
