@@ -17,7 +17,7 @@ namespace API.Entities
         public string Currency { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         public string Description { get; set; }
 
