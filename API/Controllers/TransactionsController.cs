@@ -21,19 +21,23 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Transaction>> GetTransactions()
+        public async Task<IEnumerable<Transaction>> GetTransactions([FromQuery] DateTime? startDate,
+                                                                    [FromQuery] DateTime? endDate)
         {
-            return await context.Transactions.ToListAsync();
-        }
+            await context.Transactions.LoadAsync();
+            await context.Accounts.LoadAsync();
 
-        [HttpGet]
-        public async Task<IEnumerable<Transaction>> GetTransactionsByDateRange([FromQuery] DateTime startDate,
-                                                                               [FromQuery] DateTime endDate)
-        {
-            return await context.Transactions
-                .Where(t => t.Date >= startDate && t.Date <= endDate)
-                .OrderBy(t => t.Date)
-                .ToListAsync();
+            if (startDate == null && endDate == null)
+            {
+                return await context.Transactions.ToListAsync();
+            }
+            else
+            {
+                return await context.Transactions
+                    .Where(t => t.Date >= startDate && t.Date <= endDate)
+                    .OrderBy(t => t.Date)
+                    .ToListAsync();
+            }
         }
 
         [HttpGet("{id}")]
