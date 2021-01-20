@@ -49,8 +49,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddTransaction([FromForm] Transaction transaction)
         {
-            transaction.FromAccount.Debit(transaction.Amount);
-            transaction.ToAccount.Credit(transaction.Amount);
+            transaction.FromAccount.Credit(transaction.Amount);
+            transaction.ToAccount.Debit(transaction.Amount);
 
             await context.Transactions.AddAsync(transaction);
             await context.SaveChangesAsync();
