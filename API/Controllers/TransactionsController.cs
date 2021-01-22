@@ -49,11 +49,28 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddTransaction([FromForm] Transaction transaction)
         {
-            transaction.FromAccount.Credit(transaction.Amount);
-            transaction.ToAccount.Debit(transaction.Amount);
-
+            await AdjustBalanceRecursive(transaction.FromAccount, transaction.Amount, true);
+            await AdjustBalanceRecursive(transaction.ToAccount, transaction.Amount, false);
             await context.Transactions.AddAsync(transaction);
             await context.SaveChangesAsync();
+        }
+
+        private async Task AdjustBalanceRecursive(Account child, decimal amount, bool credit)
+        {
+            if (credit)
+            {
+                child.Credit(amount);
+            }
+            else
+            {
+                child.Debit(amount);
+            }
+
+            if (child.ParentId != null)
+            {
+                Account parent = await context.Accounts.FindAsync(child.ParentId);
+                await AdjustBalanceRecursive(parent, amount, credit);
+            }
         }
     }
 }

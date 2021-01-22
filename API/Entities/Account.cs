@@ -20,7 +20,7 @@ namespace API.Entities
 
         public decimal Balance { get; set; }
 
-        public Account Parent { get; set; }
+        public int? ParentId { get; set; }
 
         public void Debit(decimal amount)
         {
@@ -32,8 +32,6 @@ namespace API.Entities
             {
                 Balance -= amount;
             }
-
-            Parent?.Debit(amount);
         }
 
         public void Credit(decimal amount)
@@ -46,8 +44,6 @@ namespace API.Entities
             {
                 Balance -= amount;
             }
-
-            Parent?.Credit(amount);
         }
     }
 }

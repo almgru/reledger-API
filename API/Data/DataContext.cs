@@ -94,9 +94,9 @@ namespace API.Data
                         await Accounts.AddAsync(child);
                     }
 
-                    if (child.Parent == null)
+                    if (child.ParentId == null)
                     {
-                        child.Parent = parent;
+                        child.ParentId = parent.Id;
                     }
 
                     childString = childString.Substring(0, childString.LastIndexOf(".")).Trim();
