@@ -6,7 +6,7 @@ namespace API.Entities
 {
     public class Account
     {
-        public enum IncreaseBalanceBehaviour
+        public enum IncreaseBalanceBehavior
         {
             OnDebit, OnCredit
         }
@@ -16,7 +16,7 @@ namespace API.Entities
         [Required]
         public string Name { get; set; }
 
-        public Account.IncreaseBalanceBehaviour IncreaseBalanceOn { get; set; }
+        public Account.IncreaseBalanceBehavior IncreaseBalanceOn { get; set; }
 
         public decimal Balance { get; set; }
 
@@ -24,7 +24,7 @@ namespace API.Entities
 
         public void Debit(decimal amount)
         {
-            if (IncreaseBalanceOn == IncreaseBalanceBehaviour.OnDebit)
+            if (IncreaseBalanceOn == IncreaseBalanceBehavior.OnDebit)
             {
                 Balance += amount;
             }
@@ -36,7 +36,7 @@ namespace API.Entities
 
         public void Credit(decimal amount)
         {
-            if (IncreaseBalanceOn == IncreaseBalanceBehaviour.OnCredit)
+            if (IncreaseBalanceOn == IncreaseBalanceBehavior.OnCredit)
             {
                 Balance += amount;
             }

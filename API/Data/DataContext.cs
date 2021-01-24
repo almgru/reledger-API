@@ -31,7 +31,7 @@ namespace API.Data
             string accountString = account.Name;
 
             // Make sure increase balance behaviour is inherited from parent
-            Account.IncreaseBalanceBehaviour increaseBehaviour;
+            Account.IncreaseBalanceBehavior increaseBehaviour;
             string mostAncestralAccountName = accountString.Substring(0, accountString.IndexOf("."));
             Account mostAncestralAccount = await Accounts.SingleOrDefaultAsync(
                 acc => acc.Name == mostAncestralAccountName
@@ -126,35 +126,35 @@ namespace API.Data
                         Id = 1,
                         Name = "Asset",
                         Balance = 0,
-                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnDebit
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehavior.OnDebit
                     },
                     new Account()
                     {
                         Id = 2,
                         Name = "Liability",
                         Balance = 0,
-                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehavior.OnCredit
                     },
                     new Account()
                     {
                         Id = 3,
                         Name = "Income",
                         Balance = 0,
-                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehavior.OnCredit
                     },
                     new Account()
                     {
                         Id = 4,
                         Name = "Expense",
                         Balance = 0,
-                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnDebit
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehavior.OnDebit
                     },
                     new Account()
                     {
                         Id = 5,
                         Name = "Capital",
                         Balance = 0,
-                        IncreaseBalanceOn = Account.IncreaseBalanceBehaviour.OnCredit
+                        IncreaseBalanceOn = Account.IncreaseBalanceBehavior.OnCredit
                     });
         }
     }
