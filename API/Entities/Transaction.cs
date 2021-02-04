@@ -30,11 +30,11 @@ namespace API.Entities
 
         [Required]
         [ModelBinder(typeof(AccountModelBinder))]
-        public Account ToAccount { get; set; }
+        public Account DebitAccount { get; set; }
 
         [Required]
         [ModelBinder(typeof(AccountModelBinder))]
-        public Account FromAccount { get; set; }
+        public Account CreditAccount { get; set; }
 
         public IEnumerable<Tag> Tags { get; set; }
 

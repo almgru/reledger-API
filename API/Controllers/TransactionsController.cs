@@ -49,8 +49,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task AddTransaction([FromForm] Transaction transaction)
         {
-            await AdjustBalanceRecursive(transaction.FromAccount, transaction.Amount, true);
-            await AdjustBalanceRecursive(transaction.ToAccount, transaction.Amount, false);
+            await AdjustBalanceRecursive(transaction.CreditAccount, transaction.Amount, true);
+            await AdjustBalanceRecursive(transaction.DebitAccount, transaction.Amount, false);
             await context.Transactions.AddAsync(transaction);
             await context.SaveChangesAsync();
         }
