@@ -1,7 +1,5 @@
 # Reledger-API
 
-## Build
+## Publish
 
-1. `cd docker`
-2. `./build.sh`
-3. `./run.sh`
+1. `docker build --tag "reledger" --file .\docker\deployment\Dockerfile .`
