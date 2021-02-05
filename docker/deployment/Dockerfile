@@ -12,6 +12,9 @@ COPY API/. ./API/
 WORKDIR /source/API
 RUN dotnet publish -c release -o /app --no-restore
 
+RUN dotnet tool install --global dotnet-ef --version 5.0
+RUN ~/.dotnet/tools/dotnet-ef database update && cp reledger.db /app
+
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 WORKDIR /app
