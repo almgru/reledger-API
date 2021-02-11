@@ -22,9 +22,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("Balance")
                         .HasColumnType("TEXT");
 
@@ -39,8 +36,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -85,36 +80,10 @@ namespace API.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("API.Entities.AppUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .HasColumnType("BLOB");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .HasColumnType("BLOB");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.ToTable("AppUsers");
-                });
-
             modelBuilder.Entity("API.Entities.Attachment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AppUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("Data")
@@ -130,8 +99,6 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("TransactionId");
 
                     b.ToTable("Attachments");
@@ -143,9 +110,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -154,8 +118,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -173,9 +135,6 @@ namespace API.Data.Migrations
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("AppUserId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("CreditAccountId")
                         .HasColumnType("INTEGER");
@@ -196,8 +155,6 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("CreditAccountId");
 
                     b.HasIndex("DebitAccountId");
@@ -205,19 +162,8 @@ namespace API.Data.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("API.Entities.Account", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany("UserAccounts")
-                        .HasForeignKey("AppUserId");
-                });
-
             modelBuilder.Entity("API.Entities.Attachment", b =>
                 {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany("UserAttachments")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("API.Entities.Transaction", null)
                         .WithMany("Attachments")
                         .HasForeignKey("TransactionId");
@@ -225,10 +171,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Tag", b =>
                 {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany("UserTags")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("API.Entities.Transaction", null)
                         .WithMany("Tags")
                         .HasForeignKey("TransactionId");
@@ -236,10 +178,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Transaction", b =>
                 {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany("UserTransactions")
-                        .HasForeignKey("AppUserId");
-
                     b.HasOne("API.Entities.Account", "CreditAccount")
                         .WithMany()
                         .HasForeignKey("CreditAccountId");
@@ -251,17 +189,6 @@ namespace API.Data.Migrations
                     b.Navigation("CreditAccount");
 
                     b.Navigation("DebitAccount");
-                });
-
-            modelBuilder.Entity("API.Entities.AppUser", b =>
-                {
-                    b.Navigation("UserAccounts");
-
-                    b.Navigation("UserAttachments");
-
-                    b.Navigation("UserTags");
-
-                    b.Navigation("UserTransactions");
                 });
 
             modelBuilder.Entity("API.Entities.Transaction", b =>

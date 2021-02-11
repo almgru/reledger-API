@@ -18,8 +18,6 @@ namespace API.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
 
-        public DbSet<AppUser> AppUsers { get; set; }
-
         public async Task AddAccountAndChildrenAsync(Account account)
         {
             // If account has no children or parents, just add it if it doesn't exist and return
@@ -119,10 +117,6 @@ namespace API.Data
 
             builder.Entity<Tag>()
                 .HasIndex(tag => tag.Name)
-                .IsUnique();
-
-            builder.Entity<AppUser>()
-                .HasIndex(user => user.UserName)
                 .IsUnique();
 
             builder.Entity<Account>()
