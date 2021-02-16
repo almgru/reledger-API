@@ -31,6 +31,10 @@ namespace API
             {
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
+            services.AddHttpsRedirection(options =>
+            {
+                options.HttpsPort = 5000;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +55,8 @@ namespace API
                 .AllowAnyMethod()
                 .AllowAnyHeader()
             );
+
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
