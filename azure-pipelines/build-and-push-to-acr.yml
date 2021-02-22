@@ -7,8 +7,12 @@ trigger:
   tags:
     include:
       - '*'
+  branches:
     exclude:
-      - 'merge'
+      - '*'
+
+# Do not trigger on pull requests
+pr:
   branches:
     exclude:
       - '*'
