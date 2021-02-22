@@ -7,14 +7,14 @@ trigger:
   tags:
     include:
       - '*'
-    exclude:
-      - 'merge'
   branches:
     exclude:
       - '*'
 
-resources:
-- repo: self
+pr:
+  branches:
+    exclude:
+      - '*'
 
 variables:
   # Container registry service connection established during pipeline creation
