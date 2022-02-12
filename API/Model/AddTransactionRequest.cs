@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using API.Converters;
 
 namespace API.Model
 {
     public record AddTransaction
     {
         [Required]
+        [JsonConverter(typeof(JsonStringDecimalConverter))]
         public decimal Amount { get; init; }
 
         [Required]
