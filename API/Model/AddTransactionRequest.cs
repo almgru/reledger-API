@@ -29,5 +29,4 @@ namespace API.Model
 
         public IEnumerable<Attachment> Attachments { get; init; }
     }
-
 }

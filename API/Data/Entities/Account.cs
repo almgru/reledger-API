@@ -9,8 +9,6 @@ namespace API.Data.Entities
         [Required]
         public string Name { get; set; }
 
-        public decimal Balance { get; set; }
-
         public int? ParentId { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,23 +25,19 @@ namespace API.Controllers
         public async Task<IEnumerable<Account>> GetAccounts()
         {
             return await context.Accounts
-                .Select(acc => new Account
-                {
-                    Name = acc.Name,
-                    Balance = acc.Balance
-                })
+                .Select(acc => new Account { Name = acc.Name })
                 .ToListAsync();
         }
 
         [HttpGet("{name}")]
-        public async Task<Account> GetAccount(string name)
+        public async Task<AccountWithBalance> GetAccount(string name, [FromQuery] DateTime? start)
         {
             return await context.Accounts
                 .Where(acc => acc.Name == name)
-                .Select(acc => new Account
+                .Select(acc => new AccountWithBalance
                 {
                     Name = acc.Name,
-                    Balance = acc.Balance
+                    Balance = 7326 // TODO: Calculate balance, optionally from date
                 })
                 .SingleOrDefaultAsync();
         }
@@ -49,10 +46,7 @@ namespace API.Controllers
         public async Task AddAccount(AddAccountRequest request)
         {
             await AddAccountAndChildren(new API.Data.Entities.Account
-            {
-                Name = request.Name,
-                Balance = request.Balance
-            });
+            { Name = request.Name });
             await context.SaveChangesAsync();
         }
 
@@ -126,6 +120,5 @@ namespace API.Controllers
                 accountString = accountString.Substring(0, rightMostDotIndex).Trim();
             }
         }
-
     }
 }

@@ -94,9 +94,6 @@ namespace API.Controllers
             var credit = await context.Accounts
                 .SingleAsync(acc => acc.Name == request.CreditAccount);
 
-            await AdjustBalanceRecursive(credit, request.Amount, true);
-            await AdjustBalanceRecursive(debit, request.Amount, false);
-
             context.Transactions.Add(new API.Data.Entities.Transaction
             {
                 Amount = request.Amount,
@@ -109,21 +106,6 @@ namespace API.Controllers
             await context.SaveChangesAsync();
 
             // TODO: Add tags and attachments
-        }
-
-        private async Task AdjustBalanceRecursive(
-                API.Data.Entities.Account child,
-                decimal amount,
-                bool credit)
-        {
-            if (child == null) { return; }
-
-            child.Balance = credit
-                ? child.Balance - amount
-                : child.Balance + amount;
-
-            var parent = await context.Accounts.FindAsync(child.ParentId);
-            await AdjustBalanceRecursive(parent, amount, credit);
         }
     }
 }

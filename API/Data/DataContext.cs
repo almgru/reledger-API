@@ -27,20 +27,17 @@ namespace API.Data
                     new Account()
                     {
                         Id = 1,
-                        Name = "Checking",
-                        Balance = 0
+                        Name = "Checking"
                     },
                     new Account()
                     {
                         Id = 2,
-                        Name = "Expenses",
-                        Balance = 0
+                        Name = "Expenses"
                     },
                     new Account()
                     {
                         Id = 3,
-                        Name = "Savings",
-                        Balance = 0
+                        Name = "Savings"
                     });
         }
     }
