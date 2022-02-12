@@ -23,7 +23,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.MapType<decimal>(() => new OpenApiSchema { Type = "string" });
+    options.MapType<decimal>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "decimal"
+    });
 });
 
 var app = builder.Build();
