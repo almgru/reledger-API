@@ -19,11 +19,7 @@ namespace API.Converters
             return JsonSerializer.Deserialize<decimal>(reader.GetString(), options);
         }
 
-        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
-        {
-            var optionsToUse = options;
-            optionsToUse.NumberHandling = JsonNumberHandling.WriteAsString;
-            JsonSerializer.Serialize(writer, value, optionsToUse);
-        }
+        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options) =>
+            JsonSerializer.Serialize(writer, value.ToString(), options);
     }
 }
