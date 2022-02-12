@@ -1,3 +1,4 @@
+using API.Converters;
 using API.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,7 @@ builder
     .AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.NumberHandling =
-            System.Text.Json.Serialization.JsonNumberHandling.WriteAsString;
+        options.JsonSerializerOptions.Converters.Add(new StringDecimalJsonConverter());
     });
 
 builder.Services.AddDbContext<DataContext>(options =>

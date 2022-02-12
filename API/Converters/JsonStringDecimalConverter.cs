@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace API.Converters
 {
-    public class JsonStringDecimalConverter : JsonConverter<decimal>
+    public class StringDecimalJsonConverter : JsonConverter<decimal>
     {
         public override decimal Read(
                 ref Utf8JsonReader reader,
@@ -19,7 +19,11 @@ namespace API.Converters
             return JsonSerializer.Deserialize<decimal>(reader.GetString(), options);
         }
 
-        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options) =>
-            JsonSerializer.Serialize(writer, value, options);
+        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
+        {
+            var optionsToUse = options;
+            optionsToUse.NumberHandling = JsonNumberHandling.WriteAsString;
+            JsonSerializer.Serialize(writer, value, optionsToUse);
+        }
     }
 }

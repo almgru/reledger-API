@@ -9,7 +9,6 @@ namespace API.Model
     public record AddTransactionRequest
     {
         [Required]
-        [JsonConverter(typeof(JsonStringDecimalConverter))]
         public decimal Amount { get; init; }
 
         [Required]
