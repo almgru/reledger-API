@@ -1,14 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using API.Data.Entities;
-using API.Constants;
 
 namespace API.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions options) : base(options)
-        {
-        }
+        public DataContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
@@ -30,37 +27,20 @@ namespace API.Data
                     new Account()
                     {
                         Id = 1,
-                        Name = "Asset",
-                        Balance = 0,
-                        IncreaseBalanceOn = IncreaseBalanceBehavior.OnDebit
+                        Name = "Checking",
+                        Balance = 0
                     },
                     new Account()
                     {
                         Id = 2,
-                        Name = "Liability",
-                        Balance = 0,
-                        IncreaseBalanceOn = IncreaseBalanceBehavior.OnCredit
+                        Name = "Expenses",
+                        Balance = 0
                     },
                     new Account()
                     {
                         Id = 3,
-                        Name = "Income",
-                        Balance = 0,
-                        IncreaseBalanceOn = IncreaseBalanceBehavior.OnCredit
-                    },
-                    new Account()
-                    {
-                        Id = 4,
-                        Name = "Expense",
-                        Balance = 0,
-                        IncreaseBalanceOn = IncreaseBalanceBehavior.OnDebit
-                    },
-                    new Account()
-                    {
-                        Id = 5,
-                        Name = "Capital",
-                        Balance = 0,
-                        IncreaseBalanceOn = IncreaseBalanceBehavior.OnCredit
+                        Name = "Savings",
+                        Balance = 0
                     });
         }
     }

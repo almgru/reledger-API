@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using API.Constants;
 
 namespace API.Data.Entities
 {
@@ -9,8 +8,6 @@ namespace API.Data.Entities
 
         [Required]
         public string Name { get; set; }
-
-        public IncreaseBalanceBehavior IncreaseBalanceOn { get; set; }
 
         public decimal Balance { get; set; }
 

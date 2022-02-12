@@ -6,7 +6,6 @@ using System;
 using System.Linq;
 using API.Data;
 using API.Model;
-using API.Constants;
 
 namespace API.Controllers
 {
@@ -119,18 +118,9 @@ namespace API.Controllers
         {
             if (child == null) { return; }
 
-            if (credit)
-            {
-                child.Balance = child.IncreaseBalanceOn == IncreaseBalanceBehavior.OnCredit
-                    ? child.Balance + amount
-                    : child.Balance - amount;
-            }
-            else
-            {
-                child.Balance = child.IncreaseBalanceOn == IncreaseBalanceBehavior.OnDebit
-                    ? child.Balance + amount
-                    : child.Balance - amount;
-            }
+            child.Balance = credit
+                ? child.Balance - amount
+                : child.Balance + amount;
 
             var parent = await context.Accounts.FindAsync(child.ParentId);
             await AdjustBalanceRecursive(parent, amount, credit);

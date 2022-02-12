@@ -27,7 +27,6 @@ namespace API.Controllers
                 .Select(acc => new Account
                 {
                     Name = acc.Name,
-                    IncreaseBalanceOn = acc.IncreaseBalanceOn,
                     Balance = acc.Balance
                 })
                 .ToListAsync();
@@ -41,7 +40,6 @@ namespace API.Controllers
                 .Select(acc => new Account
                 {
                     Name = acc.Name,
-                    IncreaseBalanceOn = acc.IncreaseBalanceOn,
                     Balance = acc.Balance
                 })
                 .SingleOrDefaultAsync();
@@ -53,7 +51,6 @@ namespace API.Controllers
             await AddAccountAndChildren(new API.Data.Entities.Account
             {
                 Name = request.Name,
-                IncreaseBalanceOn = request.IncreaseBalanceOn,
                 Balance = request.Balance
             });
             await context.SaveChangesAsync();
@@ -70,15 +67,6 @@ namespace API.Controllers
 
             // Store a copy of the original account string so we can use that as a starting point for children
             var accountString = account.Name;
-
-            // Make sure increase balance behaviour is inherited from parent
-            var mostAncestralAccountName = accountString.Substring(0, accountString.IndexOf("."));
-            var mostAncestralAccount = await context.Accounts
-                .SingleOrDefaultAsync(acc => acc.Name == mostAncestralAccountName);
-
-            var increaseBehaviour = mostAncestralAccount != null
-                ? mostAncestralAccount.IncreaseBalanceOn
-                : account.IncreaseBalanceOn;
 
             var original = accountString;
             int rightMostDotIndex;
@@ -99,8 +87,7 @@ namespace API.Controllers
                 {
                     parent = new API.Data.Entities.Account
                     {
-                        Name = parentName,
-                        IncreaseBalanceOn = increaseBehaviour
+                        Name = parentName
                     };
 
                     context.Accounts.Add(parent);
@@ -122,8 +109,7 @@ namespace API.Controllers
                     {
                         child = new API.Data.Entities.Account
                         {
-                            Name = childString,
-                            IncreaseBalanceOn = increaseBehaviour
+                            Name = childString
                         };
                         context.Accounts.Add(child);
                         await context.SaveChangesAsync();
