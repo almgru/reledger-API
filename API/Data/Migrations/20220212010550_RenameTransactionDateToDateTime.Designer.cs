@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220212010550_RenameTransactionDateToDateTime")]
+    partial class RenameTransactionDateToDateTime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
@@ -137,7 +139,7 @@ namespace API.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CreditAccountId")
+                    b.Property<int?>("CreditAccountId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Currency")
@@ -147,7 +149,7 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("DebitAccountId")
+                    b.Property<int?>("DebitAccountId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
@@ -180,15 +182,11 @@ namespace API.Data.Migrations
                 {
                     b.HasOne("API.Data.Entities.Account", "CreditAccount")
                         .WithMany()
-                        .HasForeignKey("CreditAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CreditAccountId");
 
                     b.HasOne("API.Data.Entities.Account", "DebitAccount")
                         .WithMany()
-                        .HasForeignKey("DebitAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DebitAccountId");
 
                     b.Navigation("CreditAccount");
 
