@@ -87,7 +87,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task AddTransaction([FromBody] AddTransaction request)
+        public async Task AddTransaction([FromBody] AddTransactionRequest request)
         {
             var debit = await context.Accounts
                 .SingleAsync(acc => acc.Name == request.DebitAccount);

@@ -6,7 +6,7 @@ using API.Converters;
 
 namespace API.Model
 {
-    public record AddTransaction
+    public record AddTransactionRequest
     {
         [Required]
         [JsonConverter(typeof(JsonStringDecimalConverter))]
