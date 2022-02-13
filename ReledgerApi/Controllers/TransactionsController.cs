@@ -89,6 +89,11 @@ namespace ReledgerApi.Controllers
         [HttpPost]
         public async Task AddTransaction([FromBody] AddTransactionRequest request)
         {
+            if (!decimal.TryParse(request.Amount, out var amount))
+            {
+                BadRequest("Amount could not be parsed as decimal.");
+            }
+
             var debit = await context.Accounts
                 .SingleAsync(acc => acc.Name == request.DebitAccount);
             var credit = await context.Accounts
@@ -96,7 +101,7 @@ namespace ReledgerApi.Controllers
 
             context.Transactions.Add(new ReledgerApi.Data.Entities.Transaction
             {
-                Amount = request.Amount,
+                Amount = amount,
                 Currency = request.Currency,
                 DebitAccount = debit,
                 CreditAccount = credit,

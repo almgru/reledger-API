@@ -1,4 +1,3 @@
-using ReledgerApi.Converters;
 using ReledgerApi.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +9,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder
     .Services
-    .AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new StringDecimalJsonConverter());
-    });
+    .AddControllers();
 
 builder.Services.AddDbContext<DataContext>(options =>
 {

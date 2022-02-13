@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using ReledgerApi.Converters;
 
 namespace ReledgerApi.Model
 {
     public record AddTransactionRequest
     {
         [Required]
-        public decimal Amount { get; init; }
+        public string Amount { get; init; }
 
         [Required]
         public string Currency { get; init; }
