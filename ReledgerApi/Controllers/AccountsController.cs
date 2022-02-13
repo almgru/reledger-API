@@ -32,6 +32,7 @@ namespace ReledgerApi.Controllers
         [HttpGet("{name}")]
         public async Task<AccountWithBalance> GetAccount(string name, [FromQuery] DateTime? start)
         {
+            // TODO: Support multiple currencies
             var query = context.Transactions.AsQueryable();
 
             if (start != null)
@@ -39,21 +40,28 @@ namespace ReledgerApi.Controllers
                 query = query.Where(trans => trans.DateTime >= start);
             }
 
-            var totalDebit = await query
-                .Where(trans => trans.DebitAccount.Name == name)
+            // decimal is stored as string in SQLite, so we need to sum client-side
+            var debitAmounts = await query
+                .Where(trans =>
+                    trans.DebitAccount.Name == name ||
+                    trans.DebitAccount.Name.StartsWith($"{name}."))
                 .Select(trans => trans.Amount)
                 .ToListAsync();
-            var totalCredit = await query
-                .Where(trans => trans.CreditAccount.Name == name)
+            var creditAmounts = await query
+                .Where(trans =>
+                    trans.CreditAccount.Name == name ||
+                    trans.CreditAccount.Name.StartsWith($"{name}."))
                 .Select(trans => trans.Amount)
                 .ToListAsync();
+            var totalDebit = debitAmounts.Sum();
+            var totalCredit = creditAmounts.Sum();
 
             return await context.Accounts
                 .Where(acc => acc.Name == name)
                 .Select(acc => new AccountWithBalance
                 {
                     Name = acc.Name,
-                    Balance = totalDebit.Sum() - totalCredit.Sum()
+                    Balance = totalDebit - totalCredit
                 })
                 .SingleOrDefaultAsync();
         }
