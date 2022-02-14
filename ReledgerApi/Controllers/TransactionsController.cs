@@ -6,6 +6,8 @@ using System;
 using System.Linq;
 using ReledgerApi.Data;
 using ReledgerApi.Model;
+using System.Globalization;
+using Microsoft.AspNetCore.Http;
 
 namespace ReledgerApi.Controllers
 {
@@ -24,9 +26,6 @@ namespace ReledgerApi.Controllers
         public async Task<IEnumerable<Transaction>> GetTransactions([FromQuery] DateTime? startDate,
                                                                     [FromQuery] DateTime? endDate)
         {
-            await context.Transactions.LoadAsync();
-            await context.Accounts.LoadAsync();
-
             if (startDate == null && endDate == null)
             {
                 return await context.Transactions
@@ -87,13 +86,10 @@ namespace ReledgerApi.Controllers
         }
 
         [HttpPost]
-        public async Task AddTransaction([FromBody] AddTransactionRequest request)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AddTransaction([FromBody] AddTransactionRequest request)
         {
-            if (!decimal.TryParse(request.Amount, out var amount))
-            {
-                BadRequest("Amount could not be parsed as decimal.");
-            }
-
             var debit = await context.Accounts
                 .SingleAsync(acc => acc.Name == request.DebitAccount);
             var credit = await context.Accounts
@@ -101,7 +97,7 @@ namespace ReledgerApi.Controllers
 
             context.Transactions.Add(new ReledgerApi.Data.Entities.Transaction
             {
-                Amount = amount,
+                Amount = request.Amount,
                 Currency = request.Currency,
                 DebitAccount = debit,
                 CreditAccount = credit,
@@ -111,6 +107,8 @@ namespace ReledgerApi.Controllers
             await context.SaveChangesAsync();
 
             // TODO: Add tags and attachments
+
+            return Ok();
         }
     }
 }

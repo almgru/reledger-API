@@ -7,7 +7,7 @@ namespace ReledgerApi.Model
     public record AddTransactionRequest
     {
         [Required]
-        public string Amount { get; init; }
+        public decimal Amount { get; init; }
 
         [Required]
         public string Currency { get; init; }

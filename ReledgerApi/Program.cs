@@ -5,11 +5,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
+using ReledgerApi.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 builder
     .Services
-    .AddControllers();
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+        options.JsonSerializerOptions.Converters.Add(new DecimalStringJsonConverter());
+    });
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
