@@ -7,6 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 using ReledgerApi.Converters;
+using System.Reflection;
+using System.IO;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder
@@ -30,6 +33,9 @@ builder.Services.AddSwaggerGen(options =>
         Type = "string",
         Format = "decimal"
     });
+
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+    options.IncludeXmlComments(xmlPath);
 });
 
 var app = builder.Build();

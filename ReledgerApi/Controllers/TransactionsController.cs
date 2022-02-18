@@ -6,7 +6,6 @@ using System;
 using System.Linq;
 using ReledgerApi.Data;
 using ReledgerApi.Model;
-using System.Globalization;
 using Microsoft.AspNetCore.Http;
 
 namespace ReledgerApi.Controllers
@@ -22,29 +21,31 @@ namespace ReledgerApi.Controllers
             this.context = context;
         }
 
+        /// <summary>Get all transactions. Optionally filter by date.</summary>
+        /// <remarks>
+        ///     <paramref name="startDate"/> and <paramref name="endDate"/> can be used together or individidually.
+        /// </remarks>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        /// <response code="200"></response>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Transaction>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<Transaction>> GetTransactions([FromQuery] DateTime? startDate,
                                                                     [FromQuery] DateTime? endDate)
         {
-            if (startDate == null && endDate == null)
+            var query = context.Transactions.AsQueryable();
+
+            if (startDate != null && endDate != null)
             {
-                return await context.Transactions
-                    .Select(trans => new Transaction
-                    {
-                        Amount = trans.Amount,
-                        Currency = trans.Currency,
-                        DebitAccount = trans.DebitAccount.Name,
-                        CreditAccount = trans.CreditAccount.Name,
-                        DateTime = trans.DateTime,
-                        Description = trans.Description,
-                        Tags = trans.Tags.Select(tag => tag.Name)
-                    })
-                    .ToListAsync();
+                query = query.Where(t => t.DateTime >= startDate && t.DateTime <= endDate);
             }
-            else
+            else if (startDate != null)
             {
-                return await context.Transactions
-                    .Where(t => t.DateTime >= startDate && t.DateTime <= endDate)
+                query = query.Where(t => t.DateTime >= startDate);
+            }
+
+            return await query
                     .Select(trans => new Transaction
                     {
                         Amount = trans.Amount,
@@ -56,14 +57,20 @@ namespace ReledgerApi.Controllers
                         Tags = trans.Tags.Select(tag => tag.Name)
                     })
                     .OrderBy(t => t.DateTime)
-                    .ToListAsync();
-            }
+                    .ToArrayAsync();
         }
 
+        /// <summary></summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="404"></response>
         [HttpGet("{id}")]
-        public async Task<Transaction> GetTransaction(int id)
+        [ProducesResponseType(typeof(TransactionWithAttachments), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TransactionWithAttachments>> GetTransaction(int id)
         {
-            return await context.Transactions
+            var result = await context.Transactions
                 .Where(trans => trans.Id == id)
                 .Select(trans => new TransactionWithAttachments
                 {
@@ -83,17 +90,28 @@ namespace ReledgerApi.Controllers
                         .ToList()
                 })
                 .SingleOrDefaultAsync();
+
+            if (result == null) { return NotFound(); }
+
+            return result;
         }
 
+        /// <summary></summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="404"></response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AddTransaction([FromBody] AddTransactionRequest request)
         {
             var debit = await context.Accounts
-                .SingleAsync(acc => acc.Name == request.DebitAccount);
+                .SingleOrDefaultAsync(acc => acc.Name == request.DebitAccount);
             var credit = await context.Accounts
-                .SingleAsync(acc => acc.Name == request.CreditAccount);
+                .SingleOrDefaultAsync(acc => acc.Name == request.CreditAccount);
+
+            if (debit == null || credit == null) { return NotFound(); }
 
             context.Transactions.Add(new ReledgerApi.Data.Entities.Transaction
             {
@@ -104,9 +122,10 @@ namespace ReledgerApi.Controllers
                 DateTime = request.DateTime,
                 Description = request.Description
             });
-            await context.SaveChangesAsync();
 
             // TODO: Add tags and attachments
+
+            await context.SaveChangesAsync();
 
             return Ok();
         }

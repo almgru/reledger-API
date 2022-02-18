@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using ReledgerApi.Data;
 using ReledgerApi.Data.Extensions;
 using ReledgerApi.Model;
+using Microsoft.AspNetCore.Http;
+using System.Threading;
 
 namespace ReledgerApi.Controllers
 {
@@ -21,17 +23,35 @@ namespace ReledgerApi.Controllers
             this.context = context;
         }
 
+        /// <summary>Get names of all accounts.</summary>
+        /// <returns>A list containing all account names. Returns empty list if no accounts.</returns>
+        /// <response code="200"></response>
         [HttpGet]
-        public async Task<IEnumerable<Account>> GetAccounts()
+        [ProducesResponseType(typeof(IEnumerable<Account>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             return await context.Accounts
                 .Select(acc => new Account { Name = acc.Name })
                 .ToListAsync();
         }
 
+        /// <summary>Get detailed information about an account</summary>
+        /// <returns>Detailed information about an account, including balance.</returns>
+        /// <response code="200"></response>
+        /// <response code="404">No account with the specified name exists.</response>
         [HttpGet("{name}")]
-        public async Task<AccountWithBalance> GetAccount(string name, [FromQuery] DateTime? start)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(AccountWithBalance), StatusCodes.Status200OK)]
+        public async Task<ActionResult<AccountWithBalance>> GetAccount(
+            string name,
+            [FromQuery] DateTime? start,
+            CancellationToken token)
         {
+            if (await context.Accounts.NoneAsync(acc => acc.Name == name, token))
+            {
+                return NotFound();
+            }
+
             // TODO: Support multiple currencies
             var query = context.Transactions.AsQueryable();
 
@@ -66,12 +86,16 @@ namespace ReledgerApi.Controllers
                 .SingleOrDefaultAsync();
         }
 
+        /// <summary>Add a new account</summary>
+        /// <response code="200">OK is returned even if account already exists.</response>
         [HttpPost]
-        public async Task AddAccount(AddAccountRequest request)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> AddAccount(AddAccountRequest request)
         {
-            await AddAccountAndChildren(new ReledgerApi.Data.Entities.Account
-            { Name = request.Name });
+            await AddAccountAndChildren(new ReledgerApi.Data.Entities.Account { Name = request.Name } );
             await context.SaveChangesAsync();
+
+            return Ok();
         }
 
         private async Task AddAccountAndChildren(ReledgerApi.Data.Entities.Account account)
